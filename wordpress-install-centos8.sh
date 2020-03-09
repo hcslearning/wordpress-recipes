@@ -65,8 +65,11 @@ do
     echo "drop database if exists $BD_NAME; create database $BD_NAME;" | mysql -u root
     
     # instalacion headless con wp-cli
-    wp core config --dbhost=localhost --dbname=$BD_NAME --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWD
+    wp core config --dbhost=localhost --dbname=$BD_NAME --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWD --extra-php="define('FS_METHOD', true);"
     wp core install --url=$domain --title="Sitio $i" --admin_name="$WP_USER_PREFIX$i" --admin_password="$WP_PASSWD" --admin_email="wp-s$i@$MAIN_DOMAIN"
+
+    # sobrescribo configuración para descarga directar de plugins y themes
+    #ex -s -c '20i|define("FS_METHOD", "direct");' -c x wp-config.php
 
     # permisos post instalación    
     cd $dir/wordpress/wp-content 
@@ -95,3 +98,5 @@ sudo semanage fcontext -a -t httpd_sys_rw_content_t "/var/www(/.*)*/wp-content(/
 sudo semanage fcontext -a -t httpd_sys_rw_content_t "/var/www(/.*)*/wp_backups(/.*)?"
 sudo restorecon -RFvv /var/www
 
+# mostrar errores
+sudo cat /var/log/php-fpm/www-error.log
